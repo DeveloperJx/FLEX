@@ -13,8 +13,8 @@
 
 @interface UITableView (Internal)
 // Exists at least since iOS 5
-- (BOOL)_canPerformAction:(SEL)action forCell:(UITableViewCell *)cell sender:(id)sender;
-- (void)_performAction:(SEL)action forCell:(UITableViewCell *)cell sender:(id)sender;
+- (BOOL)flex_canPerformAction:(SEL)action forCell:(UITableViewCell *)cell sender:(id)sender;
+- (void)flex_performAction:(SEL)action forCell:(UITableViewCell *)cell sender:(id)sender;
 @end
 
 @interface UITableViewCell (Internal)

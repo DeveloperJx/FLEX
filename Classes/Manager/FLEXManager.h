@@ -10,12 +10,18 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol FLEXDataProcessDelegate <NSObject>
+- (NSData *)process:(NSData *)data;
+@end
+
 @interface FLEXManager : NSObject
 
 @property (nonatomic, readonly, class) FLEXManager *sharedManager;
 
 @property (nonatomic, readonly) BOOL isHidden;
 @property (nonatomic, readonly) FLEXExplorerToolbar *toolbar;
+
+@property (nonatomic, weak) id<FLEXDataProcessDelegate> delegate;
 
 - (void)showExplorer;
 - (void)hideExplorer;

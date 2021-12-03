@@ -498,13 +498,20 @@ typedef UIViewController *(^FLEXNetworkDetailRowSelectionFuture)(void);
 
     // FIXME (RKO): Don't rely on UTF8 string encoding
     UIViewController *detailViewController = nil;
-    if ([FLEXUtility isValidJSONData:data]) {
-        NSString *prettyJSON = [FLEXUtility prettyJSONStringFromData:data];
+    
+    NSData *rawData = data;
+    
+    if (![FLEXUtility isValidJSONData:rawData]) {
+        rawData = [[[FLEXManager sharedManager] delegate] process: data];
+    }
+    
+    if ([FLEXUtility isValidJSONData:rawData]) {
+        NSString *prettyJSON = [FLEXUtility prettyJSONStringFromData:rawData];
         if (prettyJSON.length > 0) {
             detailViewController = [[FLEXWebViewController alloc] initWithText:prettyJSON];
         }
     } else if ([mimeType hasPrefix:@"image/"]) {
-        UIImage *image = [UIImage imageWithData:data];
+        UIImage *image = [UIImage imageWithData:rawData];
         detailViewController = [FLEXImagePreviewViewController forImage:image];
     } else if ([mimeType isEqual:@"application/x-plist"]) {
         id propertyList = [NSPropertyListSerialization propertyListWithData:data options:0 format:NULL error:NULL];
@@ -513,7 +520,7 @@ typedef UIViewController *(^FLEXNetworkDetailRowSelectionFuture)(void);
 
     // Fall back to trying to show the response as text
     if (!detailViewController) {
-        NSString *text = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        NSString *text = [[NSString alloc] initWithData:rawData encoding:NSUTF8StringEncoding];
         if (text.length > 0) {
             detailViewController = [[FLEXWebViewController alloc] initWithText:text];
         }

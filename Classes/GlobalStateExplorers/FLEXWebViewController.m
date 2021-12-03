@@ -9,6 +9,7 @@
 #import "FLEXWebViewController.h"
 #import "FLEXUtility.h"
 #import <WebKit/WebKit.h>
+#import "FLEXManager.h"
 
 @interface FLEXWebViewController () <WKNavigationDelegate>
 
@@ -68,12 +69,28 @@
     self.webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
     if (self.originalText.length > 0) {
-        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Copy" style:UIBarButtonItemStylePlain target:self action:@selector(copyButtonTapped:)];
+        self.navigationItem.rightBarButtonItems = @[[[UIBarButtonItem alloc] initWithTitle:@"Copy" style:UIBarButtonItemStylePlain target:self action:@selector(copyButtonTapped:)], [[UIBarButtonItem alloc] initWithTitle:@"Decompress" style:UIBarButtonItemStylePlain target:self action:@selector(decompressButtonTapped:)]];
     }
 }
 
 - (void)copyButtonTapped:(id)sender {
     [UIPasteboard.generalPasteboard setString:self.originalText];
+}
+
+- (void)decompressButtonTapped:(id)sender {
+    
+    if ([NSJSONSerialization JSONObjectWithData:[[self originalText] dataUsingEncoding: NSUTF8StringEncoding] options: nil error:nil]) {
+        return;
+    }
+    
+    NSData *data = [[NSData alloc] initWithBase64EncodedString:self.originalText options:NSDataBase64DecodingIgnoreUnknownCharacters];
+    
+    data = [FLEXUtility inflatedDataFromCompressedData:data];
+    
+    self.originalText = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
+    
+    NSString *htmlString = [NSString stringWithFormat:@"<head><style>:root{ color-scheme: light dark; }</style><meta name='viewport' content='initial-scale=1.0'></head><body><pre>%@</pre></body>", [FLEXUtility stringByEscapingHTMLEntitiesInString:self.originalText]];
+    [self.webView loadHTMLString:htmlString baseURL:nil];
 }
 
 
